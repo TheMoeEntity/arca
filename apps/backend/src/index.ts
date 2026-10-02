@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env';
+import { errorHandler } from './middleware/error.middleware';
+import { NotFoundError } from './types/errors';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -23,6 +25,17 @@ app.get('/health', (_req, res) => {
   });
 });
 
+app.get('/test-error', () => {
+  throw new Error('intentional test error');
+});
+
+// Not Found Handler
+app.use(() => {
+  throw new NotFoundError();
+});
+
+// Error Handler
+app.use(errorHandler);
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.info(`[Arca] API running → http://localhost:${PORT}`),
