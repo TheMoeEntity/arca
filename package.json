@@ -1,0 +1,11 @@
+{
+  "name": "arca",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @arca/backend dev",
+    "build": "pnpm --filter @arca/backend build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  }
+}
