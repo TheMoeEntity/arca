@@ -30,8 +30,8 @@ app.get('/test-error', () => {
 });
 
 // Not Found Handler
-app.use(() => {
-  throw new NotFoundError();
+app.use((req) => {
+  throw new NotFoundError(`Route ${req.method} ${req.path}`);
 });
 
 // Error Handler
