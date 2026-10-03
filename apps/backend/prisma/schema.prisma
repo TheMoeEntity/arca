@@ -1,0 +1,72 @@
+// apps/backend/prisma/schema.prisma
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  LOAN_OFFICER
+  UNDERWRITER
+  BORROWER
+}
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  refreshTokens RefreshToken[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String
+  passwordHash String
+  role         UserRole
+  isActive     Boolean  @default(true)
+  tenantId     String   @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  refreshTokens RefreshToken[]
+
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  tenantId  String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@map("refresh_tokens")
+}

@@ -1,0 +1,40 @@
+# arca/docker-compose.yml
+# Local development infrastructure only. Never use these credentials outside your machine.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: arca-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arca
+      POSTGRES_PASSWORD: arca_dev_password
+      POSTGRES_DB: arca_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - arca-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arca -d arca_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: arca-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - arca-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  arca-postgres-data:
+  arca-redis-data:
